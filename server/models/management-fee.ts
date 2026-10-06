@@ -10,6 +10,7 @@ const attemptSchema = new Schema(
     transferDate: Date,
     transferReference: String,
     note: String,
+    evidenceKey: String,
     reportedAt: Date,
     rejectedAt: Date,
     rejectedBy: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -32,7 +33,7 @@ const managementFeeSchema = new Schema(
     transferDate: { type: Date },
     transferReference: { type: String },
     note: { type: String },
-    evidenceKey: { type: String }, // R2 upload — added in Phase 5
+    evidenceKey: { type: String }, // private R2 object key (optional screenshot of the transfer)
 
     // Review
     verifiedBy: { type: Schema.Types.ObjectId, ref: 'User' },

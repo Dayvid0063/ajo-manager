@@ -92,7 +92,46 @@ details are empty, the fee page tells owners to contact support instead of showi
 6. The owner starts the group. The schedule engine creates every round (one per member, recipient = position N)
    and every obligation in one transaction. Starting twice is impossible.
 
+## Payments (contribution tracking)
+
+- Each member adds a **payout account** per group (Group → Overview). It is shown only to the people paying
+  them and to group admins, and never in notifications.
+- Members pay **outside the app**, then tap **Mark as paid** (date, method, reference, optional screenshot/PDF).
+  That is a *claim* (dashed border, "Awaiting confirmation") until the round's recipient (if the group allows it)
+  or an owner/admin confirms it. Nobody can confirm their own claim. A rejected claim keeps its reason, and the
+  member submits a new one; confirmed records are never edited.
+- Due / overdue are worked out from dates whenever a payment is shown (due = within 3 days, overdue = after the
+  due date, Lagos time).
+- **Reminders** run hourly as a Nitro scheduled task (`reminders:send`): due soon, due today, overdue, payout
+  approaching, and "it's your payout round". Each is sent once. In development, trigger it manually by opening
+  `/_nitro/tasks/reminders:send`.
+
+### Cloudflare R2 setup (proof uploads)
+
+Set `NUXT_R2_ACCOUNT_ID`, `NUXT_R2_ACCESS_KEY_ID`, `NUXT_R2_SECRET_ACCESS_KEY`, `NUXT_R2_BUCKET` and
+`NUXT_R2_ENDPOINT`. Keep the bucket **private**. The browser uploads directly with a 5-minute signed URL, so the
+bucket needs a CORS rule (R2 → bucket → Settings → CORS policy):
+
+```json
+[
+  {
+    "AllowedOrigins": ["http://localhost:3000", "https://your-production-domain"],
+    "AllowedMethods": ["PUT", "GET"],
+    "AllowedHeaders": ["content-type"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+Files are viewed through 60-second signed links, issued only to the payer, the recipient and group admins
+(fee screenshots: the group's owner/admins and platform admins). If R2 isn't configured, uploads show as
+unavailable and members can still report payments with a bank reference.
+
 ## Known limitations
+
+- Reminders use check-then-insert de-duplication, which is fine for one server instance. If the app is scaled out,
+  add a unique index on the reminder key.
+- Partial payments are not supported: "Mark as paid" requires the full amount.
 
 - Fee evidence uploads (screenshots) arrive with Cloudflare R2 in Phase 5. Until then, owners report the sender
   name, date and bank reference.

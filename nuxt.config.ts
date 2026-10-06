@@ -128,7 +128,11 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    experimental: { tasks: true }
+    experimental: { tasks: true },
+    // In-app reminders (due soon / today / overdue / payout). Idempotent.
+    scheduledTasks: {
+      '0 * * * *': ['reminders:send']
+    }
   },
 
   typescript: {

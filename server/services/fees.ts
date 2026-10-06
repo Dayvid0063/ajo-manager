@@ -10,10 +10,11 @@ import { Group } from '../models/group'
 import { ManagementFee, type ManagementFeeDoc } from '../models/management-fee'
 import { User } from '../models/user'
 import { withTransaction } from '../utils/db'
-import { conflict, notFound } from '../utils/errors'
+import { badRequest, conflict, notFound } from '../utils/errors'
 import { recordAudit } from './audit'
 import { loadGroupForMember, paymentReferenceFor } from './groups'
 import { notify, notifyPlatformAdmins } from './notifications'
+import { evidenceKeyBelongsTo, type Storage } from './storage'
 
 export interface FeeConfig {
   amountKobo: number
@@ -36,7 +37,8 @@ function toFeeDto(fee: FeeWithId | null) {
     reportedAt: fee.reportedAt ?? null,
     verifiedAt: fee.verifiedAt ?? null,
     rejectionReason: fee.rejectionReason ?? '',
-    previousAttempts: (fee.attempts ?? []).length
+    previousAttempts: (fee.attempts ?? []).length,
+    hasEvidence: !!fee.evidenceKey
   }
 }
 
@@ -60,9 +62,24 @@ export interface ReportFeeInput {
   transferDate: string
   transferReference?: string
   note?: string
+  evidenceKey?: string
 }
 
-export async function reportFee(groupId: string, userId: string, input: ReportFeeInput, config: FeeConfig, correlationId?: string) {
+export async function reportFee(
+  groupId: string,
+  userId: string,
+  input: ReportFeeInput,
+  config: FeeConfig,
+  correlationId?: string,
+  deps?: { storage: Storage }
+) {
+  if (input.evidenceKey) {
+    if (!evidenceKeyBelongsTo(input.evidenceKey, 'fee', groupId)) throw badRequest('That upload does not belong to this group.')
+    if (!deps?.storage.configured || !(await deps.storage.exists(input.evidenceKey))) {
+      throw badRequest('We could not find your upload. Please attach the file again.')
+    }
+  }
+
   return withTransaction(async (session) => {
     const { group } = await loadGroupForMember(groupId, userId, ['owner'], session)
     if (group.status !== 'draft') {
@@ -75,6 +92,7 @@ export async function reportFee(groupId: string, userId: string, input: ReportFe
       transferDate: lagosYmdToDate(input.transferDate),
       transferReference: input.transferReference ?? '',
       note: input.note ?? '',
+      evidenceKey: input.evidenceKey,
       reportedBy: userId,
       reportedAt: now
     }
@@ -89,6 +107,8 @@ export async function reportFee(groupId: string, userId: string, input: ReportFe
       )
       fee = created as FeeWithId
     } else if (existing.status === 'rejected') {
+      const { evidenceKey, ...rest } = report
+      const reportFields = evidenceKey ? report : rest
       // Keep the rejected attempt in history, then re-open with the new report
       const updated = await ManagementFee.findOneAndUpdate(
         { _id: existing._id, status: 'rejected' },
@@ -99,14 +119,16 @@ export async function reportFee(groupId: string, userId: string, input: ReportFe
               transferDate: existing.transferDate,
               transferReference: existing.transferReference,
               note: existing.note,
+              evidenceKey: existing.evidenceKey,
               reportedAt: existing.reportedAt,
               rejectedAt: existing.verifiedAt,
               rejectedBy: existing.verifiedBy,
               rejectionReason: existing.rejectionReason
             }
           },
-          $set: { ...report, status: 'pending' },
-          $unset: { verifiedBy: '', verifiedAt: '', rejectionReason: '' }
+          $set: { ...reportFields, status: 'pending' },
+          // A new report without a screenshot must not keep the old one
+          $unset: { verifiedBy: '', verifiedAt: '', rejectionReason: '', ...(report.evidenceKey ? {} : { evidenceKey: '' }) }
         },
         { returnDocument: 'after', session }
       )
@@ -279,4 +301,19 @@ export async function rejectFee(feeId: string, adminId: string, reason: string, 
     }
     return { fee: toFeeDto(fee) }
   })
+}
+
+/** Signed, short-lived link to the fee transfer screenshot — platform admins, or the group's owner/admins. */
+export async function feeEvidenceUrl(input: { feeId?: string, groupId?: string }, user: { id: string, isPlatformAdmin: boolean }, deps: { storage: Storage }) {
+  let fee
+  if (input.feeId) {
+    if (!user.isPlatformAdmin) throw notFound('No attachment for this fee.')
+    fee = await ManagementFee.findById(input.feeId).lean()
+  } else {
+    const { group } = await loadGroupForMember(input.groupId!, user.id, ['owner', 'admin'])
+    fee = await ManagementFee.findOne({ group: group._id }).lean()
+  }
+  if (!fee?.evidenceKey) throw notFound('No attachment for this fee.')
+  if (!deps.storage.configured) throw notFound('Attachments are not available right now.')
+  return { url: await deps.storage.presignGet(fee.evidenceKey, 60) }
 }

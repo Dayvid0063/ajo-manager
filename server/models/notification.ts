@@ -19,6 +19,8 @@ const notificationSchema = new Schema(
 
 notificationSchema.index({ user: 1, createdAt: -1 })
 notificationSchema.index({ user: 1, readAt: 1 })
+// Scheduled reminders store data.dedupeKey so each reminder is sent once
+notificationSchema.index({ user: 1, 'data.dedupeKey': 1 })
 
 export type NotificationDoc = InferSchemaType<typeof notificationSchema>
 

@@ -21,7 +21,7 @@ export const STATUS_STYLES = {
     classes: 'text-status-submitted bg-status-submitted-soft border-status-submitted border-dashed'
   },
   confirmed: {
-    label: 'Confirmed by recipient',
+    label: 'Confirmed',
     icon: 'i-lucide-circle-check',
     classes: 'text-status-confirmed bg-status-confirmed-soft border-status-confirmed/40 border-solid'
   },

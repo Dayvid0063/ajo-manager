@@ -23,6 +23,7 @@
         Thanks! We're checking our bank for your transfer — this usually takes less than a day. You'll get a notification when it's confirmed.
       </p>
       <SummaryList :items="reportRows" />
+      <AppButton v-if="fee.fee?.hasEvidence" variant="secondary" icon="i-lucide-paperclip" class="self-start" @click="openEvidence">View your screenshot</AppButton>
     </AppCard>
 
     <!-- How to pay -->
@@ -81,8 +82,9 @@
         optional
         :error="fieldError('transferReference')"
       />
+      <EvidenceUpload v-model="values.evidenceKey" purpose="fee" :target-id="group.id" label="Screenshot of the transfer" @uploading="uploading = $event" />
       <AppTextarea v-model="values.note" label="Anything else we should know?" :rows="2" optional :error="fieldError('note')" />
-      <AppButton type="submit" :loading="pending" icon="i-lucide-send" block>I have paid — report payment</AppButton>
+      <AppButton type="submit" :loading="pending" :disabled="uploading" icon="i-lucide-send" block>I have paid — report payment</AppButton>
     </AppCard>
 
     <AppCard v-if="!group?.isOwner && fee.feeStatus !== 'confirmed'" class="text-text-muted">
@@ -126,10 +128,23 @@ const { values, formError, pending, fieldError, submit } = useForm(reportFeeSche
   senderName: '',
   transferDate: lagosToday(),
   transferReference: '',
-  note: ''
+  note: '',
+  evidenceKey: undefined
 })
+const uploading = ref(false)
+
+async function openEvidence() {
+  const tab = window.open('', '_blank')
+  try {
+    const { url } = await $fetch(`/api/groups/${route.params.id}/fee/evidence`)
+    if (tab) tab.location.href = url
+  } catch {
+    tab?.close()
+  }
+}
 
 async function onSubmit() {
+  if (!values.evidenceKey) values.evidenceKey = undefined
   const result = await submit(data => $fetch(`/api/groups/${route.params.id}/fee`, { method: 'POST', body: data }))
   if (result) {
     await Promise.all([refresh(), refreshGroup()])

@@ -1,11 +1,11 @@
-// server/api/groups/[id]/fee.get.ts
-// Fee instructions (platform bank details, amount, reference) + current report.
+// server/api/groups/[id]/payout-account/index.get.ts
+// The caller's own payout bank account for this group.
 import { groupIdParamsSchema } from '#shared/schemas/group'
-import { getGroupFee } from '../../../services/fees'
+import { getMyPayoutAccount } from '../../../../services/bank-accounts'
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event)
   const { id } = validateParams(event, groupIdParamsSchema)
   setHeader(event, 'Cache-Control', 'no-store')
-  return getGroupFee(id, user.id, feeConfig())
+  return getMyPayoutAccount(id, user.id)
 })

@@ -43,6 +43,12 @@ export const FEE_STATUS_CHIPS = {
   rejected: { status: 'rejected', label: 'Fee not confirmed' }
 }
 
+export const METHOD_LABELS = {
+  bank_transfer: 'Bank transfer',
+  cash: 'Cash',
+  other: 'Other'
+}
+
 export const ROLE_LABELS = {
   owner: 'Owner',
   admin: 'Admin',

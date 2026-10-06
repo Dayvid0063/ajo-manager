@@ -42,6 +42,7 @@
 
       <p v-if="item.note" class="rounded-xl bg-surface-muted p-3 text-sm"><strong>Owner's note:</strong> {{ item.note }}</p>
       <p v-if="item.previousAttempts" class="text-sm text-text-muted">Reported {{ item.previousAttempts + 1 }} times (earlier reports were rejected).</p>
+      <AppButton v-if="item.hasEvidence" variant="secondary" icon="i-lucide-paperclip" class="self-start" @click="openEvidence(item)">View transfer screenshot</AppButton>
       <AppAlert v-if="item.status === 'rejected'" tone="error">Rejected: {{ item.rejectionReason }}</AppAlert>
 
       <template v-if="item.status === 'pending'">
@@ -91,6 +92,17 @@ function rowsFor(item) {
     ...(item.transferReference ? [{ key: 'bankref', label: 'Bank reference', value: item.transferReference }] : []),
     { key: 'reported', label: 'Reported', value: item.reportedAt ? formatLagosDateTime(item.reportedAt) : '—' }
   ]
+}
+
+async function openEvidence(item) {
+  const tab = window.open('', '_blank')
+  try {
+    const { url } = await $fetch(`/api/admin/fees/${item.id}/evidence`)
+    if (tab) tab.location.href = url
+  } catch (error) {
+    tab?.close()
+    actionMessage.value = { tone: 'error', text: error?.data?.message || 'Could not open the screenshot.' }
+  }
 }
 
 const busyId = ref('')

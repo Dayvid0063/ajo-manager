@@ -31,10 +31,13 @@
     <AppCard v-if="group.status === 'active'" class="flex flex-wrap items-center justify-between gap-3 border-primary/30">
       <div>
         <h2 class="font-bold">The group is running</h2>
-        <p class="text-text-muted">Started {{ group.activatedAt ? formatLagosDate(group.activatedAt, 'medium') : '' }}. Payment tracking arrives in the next update.</p>
+        <p class="text-text-muted">Started {{ group.activatedAt ? formatLagosDate(group.activatedAt, 'medium') : '' }}. See who has paid in each round.</p>
       </div>
-      <AppButton :to="`/groups/${group.id}/schedule`" variant="secondary" icon="i-lucide-calendar-days">See schedule</AppButton>
+      <AppButton :to="`/groups/${group.id}/contributions`" icon="i-lucide-hand-coins">Payments</AppButton>
     </AppCard>
+
+    <!-- Where members send my payout -->
+    <PayoutAccountCard v-if="['awaiting_members', 'active'].includes(group.status)" :group-id="group.id" />
 
     <AppCard class="flex flex-col gap-4">
       <h2 class="font-bold">How this group works</h2>

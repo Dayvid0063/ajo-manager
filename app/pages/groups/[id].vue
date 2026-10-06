@@ -60,6 +60,7 @@ const tabs = computed(() => {
   const started = ['active', 'completed'].includes(g.status)
   return [
     { to: base, label: 'Overview', icon: 'i-lucide-layout-grid' },
+    ...(started ? [{ to: `${base}/contributions`, label: 'Payments', icon: 'i-lucide-hand-coins' }] : []),
     ...(started ? [{ to: `${base}/schedule`, label: 'Schedule', icon: 'i-lucide-calendar-days' }] : []),
     ...(g.status !== 'draft' ? [{ to: `${base}/members`, label: 'Members', icon: 'i-lucide-users-round' }] : []),
     ...(g.canManage && g.status === 'awaiting_members' ? [{ to: `${base}/invite`, label: 'Invite', icon: 'i-lucide-user-plus' }] : []),

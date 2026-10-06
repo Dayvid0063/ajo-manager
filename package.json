@@ -26,6 +26,7 @@
     "@nuxtjs/color-mode": "^4.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@vite-pwa/nuxt": "^1.1.1",
+    "aws4fetch": "^1.0.20",
     "mongoose": "^9.11.0",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "^0.5.30",

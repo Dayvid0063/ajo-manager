@@ -64,7 +64,8 @@ export const reportFeeSchema = z.object({
     .refine(isValidYmd, 'Choose a valid date')
     .refine(value => value <= lagosToday(), 'The transfer date cannot be in the future'),
   transferReference: z.string().trim().max(100).optional().default(''),
-  note: z.string().trim().max(500).optional().default('')
+  note: z.string().trim().max(500).optional().default(''),
+  evidenceKey: z.string().max(300).regex(/^evidence\/fee\/[a-f\d]{24}\/[\w-]+\.(jpg|png|webp|pdf)$/, 'Invalid upload').optional()
 })
 
 export const rejectFeeSchema = z.object({

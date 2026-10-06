@@ -57,8 +57,12 @@ const tabs = computed(() => {
   const g = group.value
   if (!g) return []
   const base = `/groups/${g.id}`
+  const started = ['active', 'completed'].includes(g.status)
   return [
     { to: base, label: 'Overview', icon: 'i-lucide-layout-grid' },
+    ...(started ? [{ to: `${base}/schedule`, label: 'Schedule', icon: 'i-lucide-calendar-days' }] : []),
+    ...(g.status !== 'draft' ? [{ to: `${base}/members`, label: 'Members', icon: 'i-lucide-users-round' }] : []),
+    ...(g.canManage && g.status === 'awaiting_members' ? [{ to: `${base}/invite`, label: 'Invite', icon: 'i-lucide-user-plus' }] : []),
     { to: `${base}/rules`, label: 'Rules', icon: 'i-lucide-scroll-text' },
     ...(g.canManage ? [{ to: `${base}/fee`, label: 'Platform fee', icon: 'i-lucide-receipt' }] : []),
     ...(g.canManage ? [{ to: `${base}/activity`, label: 'Activity', icon: 'i-lucide-history' }] : []),

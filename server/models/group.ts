@@ -24,6 +24,9 @@ const groupSchema = new Schema(
     // Lifecycle — changed only by server services (docs/state-machines.md)
     status: { type: String, default: 'draft' },
     feeStatus: { type: String, default: 'unpaid' }, // unpaid | pending | confirmed | rejected
+    // Approved members, kept in step inside transactions. Approvals update this
+    // field conditionally so two simultaneous approvals can't overfill the group.
+    approvedMemberCount: { type: Number, default: 1 },
     inviteCode: { type: String },
     invitesEnabled: { type: Boolean, default: false },
     activatedAt: { type: Date },

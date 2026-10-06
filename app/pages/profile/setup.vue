@@ -40,6 +40,7 @@ import { profileSchema } from '#shared/schemas/auth'
 definePageMeta({ layout: 'auth' })
 useHead({ title: 'Your profile · Ajo Manager' })
 
+const route = useRoute()
 const { refreshSession } = useAuth()
 const { values, formError, pending, fieldError, submit } = useForm(profileSchema, { name: '', phone: '' })
 
@@ -50,7 +51,7 @@ async function onSubmit() {
     return true
   })
   if (done) {
-    await navigateTo('/home')
+    await navigateTo(safeRedirect(route.query.redirect))
   }
 }
 </script>

@@ -34,7 +34,7 @@
 
     <p class="text-center text-text-muted">
       New here?
-      <NuxtLink to="/register" class="font-semibold text-primary hover:underline">Create a free account</NuxtLink>
+      <NuxtLink :to="{ path: '/register', query: route.query }" class="font-semibold text-primary hover:underline">Create a free account</NuxtLink>
     </p>
   </div>
 </template>

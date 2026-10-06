@@ -10,11 +10,13 @@ import { Group, type GroupDoc } from '../models/group'
 import { GroupMember, type GroupMemberDoc } from '../models/group-member'
 import { GroupRules } from '../models/group-rules'
 import { AuditLog } from '../models/audit-log'
+import { RuleAcceptance } from '../models/rule-acceptance'
 import { User } from '../models/user'
 import { withTransaction } from '../utils/db'
 import { conflict, forbidden, notFound } from '../utils/errors'
 import { hasGroupRole, isApprovedMember } from '../utils/policy'
 import { recordAudit } from './audit'
+import { notify } from './notifications'
 
 type GroupWithId = GroupDoc & { _id: Types.ObjectId, createdAt?: Date }
 type MemberWithId = GroupMemberDoc & { _id: Types.ObjectId }
@@ -103,6 +105,7 @@ export function toGroupDto(group: GroupWithId, membership?: Pick<MemberWithId, '
           startDate
         })
       : null,
+    approvedMemberCount: group.approvedMemberCount ?? 1,
     myRole: role,
     canManage,
     isOwner: role === 'owner',
@@ -117,12 +120,23 @@ export type GroupDto = ReturnType<typeof toGroupDto>
 // ── Queries ───────────────────────────────────────────────────────────────
 
 export async function listMyGroups(userId: string) {
-  const memberships = await GroupMember.find({ user: userId, status: 'approved' }).lean()
+  const memberships = await GroupMember.find({ user: userId, status: { $in: ['approved', 'pending'] } }).lean()
   const groups = await Group.find({ _id: { $in: memberships.map(m => m.group) } })
     .sort({ createdAt: -1 })
     .lean()
   const byGroup = new Map(memberships.map(m => [String(m.group), m]))
-  return groups.map(group => toGroupDto(group, byGroup.get(String(group._id))))
+  const items = []
+  const pending = []
+  for (const group of groups) {
+    const membership = byGroup.get(String(group._id))
+    if (membership?.status === 'approved') {
+      items.push(toGroupDto(group, membership))
+    } else {
+      // Applicants only see a limited summary (brief §16)
+      pending.push({ name: group.name ?? '', inviteCode: group.inviteCode ?? '', requestedAt: membership?.updatedAt ?? null })
+    }
+  }
+  return { items, pending }
 }
 
 export async function getGroupDetail(groupId: string, userId: string) {
@@ -131,10 +145,21 @@ export async function getGroupDetail(groupId: string, userId: string) {
     GroupRules.findOne({ group: group._id }).sort({ version: -1 }).lean(),
     GroupMember.countDocuments({ group: group._id, status: 'approved' })
   ])
+  const rulesAccepted = rules
+    ? !!(await RuleAcceptance.exists({ group: group._id, member: membership._id, ruleVersion: rules.version }))
+    : false
   return {
     group: toGroupDto(group, membership),
     rules: rules ? { version: rules.version ?? 1, body: rules.body ?? '', publishedAt: rules.publishedAt ?? null } : null,
-    memberCount
+    memberCount,
+    // The caller's own to-dos
+    me: {
+      memberId: String(membership._id),
+      role: membership.role ?? 'member',
+      position: membership.position ?? null,
+      positionAccepted: !!membership.positionAcceptedAt,
+      rulesAccepted
+    }
   }
 }
 
@@ -162,7 +187,8 @@ export async function createGroup(ownerId: string, input: CreateGroupInput, corr
               status: 'draft',
               feeStatus: 'unpaid',
               inviteCode: generateInviteCode(),
-              invitesEnabled: false
+              invitesEnabled: false,
+              approvedMemberCount: 1
             }
           ],
           { session }
@@ -286,6 +312,19 @@ export async function saveRules(groupId: string, actorId: string, body: string, 
       { actor: actorId, action: 'rules.published', entityType: 'group_rules', entityId: group._id, group: group._id, after: { version }, correlationId },
       session
     )
+    if (status === 'awaiting_members') {
+      const members = await GroupMember.find({ group: group._id, status: 'approved', user: { $ne: actorId } }).select('user').session(session).lean()
+      await notify(
+        members.map(m => m.user!),
+        {
+          type: 'rules.updated',
+          title: 'Group rules updated',
+          body: `The rules for "${group.name}" changed. Please read and accept the new version.`,
+          data: { groupId: String(group._id), link: `/groups/${group._id}/rules` }
+        },
+        session
+      )
+    }
     return { version, body, publishedAt: now }
   })
 }
@@ -330,7 +369,17 @@ const ACTION_LABELS: Record<string, string> = {
   'rules.published': 'published the group rules',
   'fee.reported': 'reported the platform fee payment',
   'fee.confirmed': 'confirmed the platform fee',
-  'fee.rejected': 'could not confirm the platform fee'
+  'fee.rejected': 'could not confirm the platform fee',
+  'membership.requested': 'asked to join',
+  'membership.approved': 'approved a member',
+  'membership.rejected': 'declined a join request',
+  'membership.removed': 'removed a member',
+  'role.assigned': 'changed a member’s role',
+  'rules.accepted': 'accepted the rules',
+  'position.assigned': 'set a payout position',
+  'position.accepted': 'accepted their payout position',
+  'positions.drawn': 'ran the random payout draw',
+  'group.activated': 'started the group'
 }
 
 export async function groupActivity(groupId: string, userId: string, input: { page: number, limit: number }) {

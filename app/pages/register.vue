@@ -38,7 +38,7 @@
 
     <p class="text-center text-text-muted">
       Already have an account?
-      <NuxtLink to="/login" class="font-semibold text-primary hover:underline">Log in</NuxtLink>
+      <NuxtLink :to="{ path: '/login', query: route.query }" class="font-semibold text-primary hover:underline">Log in</NuxtLink>
     </p>
   </div>
 </template>
@@ -49,6 +49,7 @@ import { registerSchema } from '#shared/schemas/auth'
 definePageMeta({ layout: 'auth' })
 useHead({ title: 'Create account · Ajo Manager' })
 
+const route = useRoute()
 const { register } = useAuth()
 const { values, formError, pending, fieldError, submit } = useForm(registerSchema, {
   email: '',
@@ -62,7 +63,7 @@ async function onSubmit() {
     return true
   })
   if (done) {
-    await navigateTo('/profile/setup')
+    await navigateTo({ path: '/profile/setup', query: { redirect: safeRedirect(route.query.redirect) } })
   }
 }
 </script>

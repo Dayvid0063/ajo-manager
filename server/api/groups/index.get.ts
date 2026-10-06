@@ -4,5 +4,5 @@ import { listMyGroups } from '../../services/groups'
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event)
-  return { items: await listMyGroups(user.id) }
+  return listMyGroups(user.id)
 })

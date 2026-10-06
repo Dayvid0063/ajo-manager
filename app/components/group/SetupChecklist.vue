@@ -63,7 +63,7 @@ const steps = computed(() => {
     {
       title: 'Invite and approve members',
       state: feeDone ? 'current' : 'todo',
-      description: feeDone ? 'Invite links and member approval arrive in the next update.' : `You need ${g.plannedMemberCount} members, including you.`
+      description: feeDone ? 'Share the invite code and approve join requests.' : `You need ${g.plannedMemberCount} members, including you.`
     },
     { title: 'Members accept the rules and their payout positions', state: 'todo', description: '' },
     { title: 'Start the group', state: 'todo', description: 'Contribution tracking begins.' }

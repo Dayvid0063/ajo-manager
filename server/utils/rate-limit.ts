@@ -66,5 +66,7 @@ const MINUTE = 60_000
 export const authLimiters = {
   loginByIp: new RateLimiter(30, 15 * MINUTE),
   loginByEmail: new RateLimiter(8, 15 * MINUTE),
-  registerByIp: new RateLimiter(10, 60 * MINUTE)
+  registerByIp: new RateLimiter(10, 60 * MINUTE),
+  // Stops guessing invite codes
+  inviteLookupByIp: new RateLimiter(60, 15 * MINUTE)
 }

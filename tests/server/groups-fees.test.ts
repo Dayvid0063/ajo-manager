@@ -80,8 +80,8 @@ describe('create group', () => {
     const stranger = await makeUser()
     const dto = await createGroup(owner, groupInput({ name: 'Private Ajo' }))
 
-    expect((await listMyGroups(owner)).map(g => g.id)).toContain(dto.id)
-    expect((await listMyGroups(stranger)).map(g => g.id)).not.toContain(dto.id)
+    expect((await listMyGroups(owner)).items.map(g => g.id)).toContain(dto.id)
+    expect((await listMyGroups(stranger)).items.map(g => g.id)).not.toContain(dto.id)
     expect(await statusOf(getGroupDetail(dto.id, stranger))).toBe(404)
   })
 })

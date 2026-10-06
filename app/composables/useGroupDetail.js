@@ -9,5 +9,7 @@ export function useGroupDetail() {
   const group = computed(() => detail.data.value?.group ?? null)
   const rules = computed(() => detail.data.value?.rules ?? null)
   const memberCount = computed(() => detail.data.value?.memberCount ?? 0)
-  return { group, rules, memberCount, refresh: detail.refresh }
+  // The caller's own membership: role, position, what they still need to accept
+  const me = computed(() => detail.data.value?.me ?? null)
+  return { group, rules, memberCount, me, refresh: detail.refresh }
 }

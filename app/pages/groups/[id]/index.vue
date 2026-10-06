@@ -6,29 +6,57 @@
       This group was cancelled{{ group.cancelledAt ? ` on ${formatLagosDate(group.cancelledAt, 'medium')}` : '' }}.
     </AppAlert>
 
-    <SetupChecklist v-if="['draft', 'awaiting_members'].includes(group.status)" :group="group" />
+    <AppAlert v-if="justActivated" tone="success">
+      The group has started! Everyone has been told when they pay and when they collect.
+    </AppAlert>
 
-    <AppCard v-if="group.inviteCode" class="flex flex-col gap-2 border-primary/30">
-      <h2 class="font-bold">Invite code</h2>
-      <p class="tabular text-3xl font-extrabold tracking-[0.2em] text-primary">{{ group.inviteCode }}</p>
-      <p class="text-sm text-text-muted">Invite links, QR codes and join requests arrive in the next update.</p>
+    <!-- Before the fee is confirmed -->
+    <SetupChecklist v-if="group.status === 'draft'" :group="group" />
+
+    <!-- Gathering members -->
+    <template v-if="group.status === 'awaiting_members'">
+      <ActivationCard v-if="group.isOwner" :key="refreshKey" :group="group" @activated="onActivated" />
+      <MyTodos v-if="me" :group="group" :me="me" @changed="onChanged" />
+
+      <AppCard v-if="group.canManage && group.inviteCode" class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-bold">Invite members</h2>
+          <p class="text-text-muted">{{ memberCount }} of {{ group.plannedMemberCount }} joined · code <strong class="tabular tracking-widest">{{ group.inviteCode }}</strong></p>
+        </div>
+        <AppButton :to="`/groups/${group.id}/invite`" icon="i-lucide-share-2">Share invite</AppButton>
+      </AppCard>
+    </template>
+
+    <!-- Running -->
+    <AppCard v-if="group.status === 'active'" class="flex flex-wrap items-center justify-between gap-3 border-primary/30">
+      <div>
+        <h2 class="font-bold">The group is running</h2>
+        <p class="text-text-muted">Started {{ group.activatedAt ? formatLagosDate(group.activatedAt, 'medium') : '' }}. Payment tracking arrives in the next update.</p>
+      </div>
+      <AppButton :to="`/groups/${group.id}/schedule`" variant="secondary" icon="i-lucide-calendar-days">See schedule</AppButton>
     </AppCard>
 
     <AppCard class="flex flex-col gap-4">
       <h2 class="font-bold">How this group works</h2>
       <GroupSummary v-if="group.startDate" :settings="group" />
     </AppCard>
-
-    <AppCard class="flex items-center justify-between gap-3">
-      <div>
-        <h2 class="font-bold">Members</h2>
-        <p class="text-text-muted">{{ memberCount }} of {{ group.plannedMemberCount }} joined</p>
-      </div>
-      <span class="tabular text-2xl font-extrabold text-primary">{{ memberCount }}/{{ group.plannedMemberCount }}</span>
-    </AppCard>
   </div>
 </template>
 
 <script setup>
-const { group, memberCount } = useGroupDetail()
+const { group, memberCount, me, refresh } = useGroupDetail()
+
+const justActivated = ref(false)
+const refreshKey = ref(0)
+
+async function onChanged() {
+  await refresh()
+  refreshKey.value++ // re-check readiness
+}
+
+async function onActivated() {
+  await refresh()
+  justActivated.value = true
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 </script>

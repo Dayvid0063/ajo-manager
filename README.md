@@ -81,6 +81,17 @@ The first `npm test` may take a minute while `mongodb-memory-server` downloads i
 The fee amount and bank details come from `NUXT_MANAGEMENT_FEE_KOBO` and `NUXT_PLATFORM_BANK_*`. If the bank
 details are empty, the fee page tells owners to contact support instead of showing payment details.
 
+## Members, positions & starting a group
+
+1. Once the fee is confirmed, owners and admins share the **invite code, link or QR** (Group → Invite).
+2. People open `/join/<code>`, see a limited summary, register or log in, and **ask to join**.
+3. The owner or an admin approves requests, up to the planned number of members.
+4. Payout positions follow the group's method: **admins assign**, **members pick** an open slot, or the owner runs a
+   **random draw** once everyone has joined.
+5. Every member accepts the **latest rules version** and their **position**.
+6. The owner starts the group. The schedule engine creates every round (one per member, recipient = position N)
+   and every obligation in one transaction. Starting twice is impossible.
+
 ## Known limitations
 
 - Fee evidence uploads (screenshots) arrive with Cloudflare R2 in Phase 5. Until then, owners report the sender

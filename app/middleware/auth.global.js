@@ -4,11 +4,16 @@
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/design']
 const GUEST_ONLY_ROUTES = ['/', '/login', '/register', '/forgot-password']
 
+// Invite pages work logged in or out (logged-out visitors see the summary first)
+function isInviteRoute(path) {
+  return path === '/join' || path.startsWith('/join/')
+}
+
 export default defineNuxtRouteMiddleware((to) => {
   const { loggedIn, user } = useUserSession()
 
   if (!loggedIn.value) {
-    if (PUBLIC_ROUTES.includes(to.path)) return
+    if (PUBLIC_ROUTES.includes(to.path) || isInviteRoute(to.path)) return
     return navigateTo({ path: '/login', query: { redirect: to.fullPath } })
   }
 
@@ -19,12 +24,12 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   if (GUEST_ONLY_ROUTES.includes(to.path)) {
-    return navigateTo('/home')
+    return navigateTo(safeRedirect(to.query.redirect))
   }
 
-  // New accounts finish their profile first
+  // New accounts finish their profile first (then continue where they were going)
   if (!user.value?.name && to.path !== '/profile/setup') {
-    return navigateTo('/profile/setup')
+    return navigateTo({ path: '/profile/setup', query: { redirect: to.fullPath } })
   }
 
   if (to.path.startsWith('/admin') && !user.value?.isPlatformAdmin) {

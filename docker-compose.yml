@@ -1,0 +1,30 @@
+# docker-compose.yml
+services:
+
+  mongodb:
+    image: 'mongo:8.0.15'
+    container_name: ajo-manager-mongodb
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - '${MONGODB_PORT:-27017}:27017'
+    volumes:
+      - 'ajo-manager-mongodb:/data/db'
+    networks:
+      - ajo-manager
+    restart: unless-stopped
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }"
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+networks:
+  ajo-manager:
+    driver: bridge
+    name: ajo-manager
+
+volumes:
+  ajo-manager-mongodb:
+    driver: local

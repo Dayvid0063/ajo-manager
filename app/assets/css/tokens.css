@@ -1,0 +1,93 @@
+/* app/assets/css/tokens.css
+ *
+ * THE single source of truth for every color in Ajo Manager.
+ * To rebrand: change values here only. Components must never use raw hex
+ * values or Tailwind palette colors — only the tokens below (via main.css).
+ *
+ * :root  = light theme
+ * .dark  = dark theme (class set by @nuxtjs/color-mode)
+ */
+
+:root {
+  /* Brand */
+  --ajo-primary: #0e7a57;
+  --ajo-primary-hover: #0b6447;
+  --ajo-primary-soft: #e3f2ec;
+  --ajo-on-primary: #ffffff;
+  --ajo-accent: #c0582f;
+  --ajo-accent-soft: #f8e7df;
+  --ajo-on-accent: #ffffff;
+
+  /* Surfaces & text */
+  --ajo-bg: #faf8f5;
+  --ajo-surface: #ffffff;
+  --ajo-surface-muted: #f2eee8;
+  --ajo-border: #e5dfd6;
+  --ajo-text: #1e1f1c;
+  --ajo-text-muted: #6b6860;
+  --ajo-focus: #0e7a57;
+
+  /* Statuses — each has a strong color and a soft background */
+  --ajo-status-upcoming: #5f6670;
+  --ajo-status-upcoming-soft: #eef0f2;
+  --ajo-status-due: #b45309;
+  --ajo-status-due-soft: #fdf1df;
+  --ajo-status-submitted: #0369a1;
+  --ajo-status-submitted-soft: #e3f1fa;
+  --ajo-status-confirmed: #15803d;
+  --ajo-status-confirmed-soft: #e3f5e9;
+  --ajo-status-overdue: #b91c1c;
+  --ajo-status-overdue-soft: #fbe7e7;
+  --ajo-status-rejected: #b91c1c;
+  --ajo-status-rejected-soft: #fbe7e7;
+  --ajo-status-disputed: #7c3aed;
+  --ajo-status-disputed-soft: #f1eafd;
+  --ajo-status-fee: #4338ca;
+  --ajo-status-fee-soft: #ebeafc;
+  --ajo-status-payout: var(--ajo-accent);
+  --ajo-status-payout-soft: var(--ajo-accent-soft);
+
+  /* Elevation */
+  --ajo-shadow-card: 0 1px 2px rgb(30 31 28 / 0.04), 0 4px 12px rgb(30 31 28 / 0.06);
+}
+
+.dark {
+  /* Brand */
+  --ajo-primary: #34c38f;
+  --ajo-primary-hover: #5ad3a5;
+  --ajo-primary-soft: #173328;
+  --ajo-on-primary: #062a1e;
+  --ajo-accent: #e8875e;
+  --ajo-accent-soft: #3a2419;
+  --ajo-on-accent: #2a1208;
+
+  /* Surfaces & text */
+  --ajo-bg: #121412;
+  --ajo-surface: #1b1e1b;
+  --ajo-surface-muted: #242824;
+  --ajo-border: #2f342f;
+  --ajo-text: #edebe6;
+  --ajo-text-muted: #a3a099;
+  --ajo-focus: #5ad3a5;
+
+  /* Statuses */
+  --ajo-status-upcoming: #a4abb5;
+  --ajo-status-upcoming-soft: #262a2f;
+  --ajo-status-due: #f5a524;
+  --ajo-status-due-soft: #3a2a10;
+  --ajo-status-submitted: #5bb8f0;
+  --ajo-status-submitted-soft: #10293a;
+  --ajo-status-confirmed: #4ade80;
+  --ajo-status-confirmed-soft: #12301d;
+  --ajo-status-overdue: #f87171;
+  --ajo-status-overdue-soft: #3a1717;
+  --ajo-status-rejected: #f87171;
+  --ajo-status-rejected-soft: #3a1717;
+  --ajo-status-disputed: #b794f6;
+  --ajo-status-disputed-soft: #2a1f42;
+  --ajo-status-fee: #8b8cf8;
+  --ajo-status-fee-soft: #1f1f45;
+
+  /* Elevation — borders do the work in dark mode */
+  --ajo-shadow-card: none;
+}

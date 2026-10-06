@@ -1,0 +1,87 @@
+/* app/assets/css/main.css
+ * Tailwind v4 entry. Maps the design tokens in tokens.css into Tailwind
+ * utilities (bg-surface, text-primary, border-status-submitted, ...).
+ */
+@import 'tailwindcss';
+@import './tokens.css';
+
+/* Dark variant follows the .dark class set by @nuxtjs/color-mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* inline = utilities reference the CSS variables, so theme switches are live */
+@theme inline {
+  /* Remove Tailwind's default palette so only our tokens can be used */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-primary: var(--ajo-primary);
+  --color-primary-hover: var(--ajo-primary-hover);
+  --color-primary-soft: var(--ajo-primary-soft);
+  --color-on-primary: var(--ajo-on-primary);
+  --color-accent: var(--ajo-accent);
+  --color-accent-soft: var(--ajo-accent-soft);
+  --color-on-accent: var(--ajo-on-accent);
+
+  --color-bg: var(--ajo-bg);
+  --color-surface: var(--ajo-surface);
+  --color-surface-muted: var(--ajo-surface-muted);
+  --color-border: var(--ajo-border);
+  --color-text: var(--ajo-text);
+  --color-text-muted: var(--ajo-text-muted);
+  --color-focus: var(--ajo-focus);
+
+  --color-status-upcoming: var(--ajo-status-upcoming);
+  --color-status-upcoming-soft: var(--ajo-status-upcoming-soft);
+  --color-status-due: var(--ajo-status-due);
+  --color-status-due-soft: var(--ajo-status-due-soft);
+  --color-status-submitted: var(--ajo-status-submitted);
+  --color-status-submitted-soft: var(--ajo-status-submitted-soft);
+  --color-status-confirmed: var(--ajo-status-confirmed);
+  --color-status-confirmed-soft: var(--ajo-status-confirmed-soft);
+  --color-status-overdue: var(--ajo-status-overdue);
+  --color-status-overdue-soft: var(--ajo-status-overdue-soft);
+  --color-status-rejected: var(--ajo-status-rejected);
+  --color-status-rejected-soft: var(--ajo-status-rejected-soft);
+  --color-status-disputed: var(--ajo-status-disputed);
+  --color-status-disputed-soft: var(--ajo-status-disputed-soft);
+  --color-status-fee: var(--ajo-status-fee);
+  --color-status-fee-soft: var(--ajo-status-fee-soft);
+  --color-status-payout: var(--ajo-status-payout);
+  --color-status-payout-soft: var(--ajo-status-payout-soft);
+
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 1rem;
+  --shadow-card: var(--ajo-shadow-card);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--ajo-bg);
+    color: var(--ajo-text);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ajo-focus);
+    outline-offset: 2px;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}

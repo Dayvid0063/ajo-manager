@@ -36,6 +36,15 @@
       <AppButton :to="`/groups/${group.id}/contributions`" icon="i-lucide-hand-coins">Payments</AppButton>
     </AppCard>
 
+    <!-- Finished -->
+    <AppCard v-if="group.status === 'completed'" class="flex flex-wrap items-center justify-between gap-3 border-status-confirmed/40">
+      <div>
+        <h2 class="font-bold">This cycle is complete</h2>
+        <p class="text-text-muted">See who paid what and who received their payout.</p>
+      </div>
+      <AppButton :to="`/groups/${group.id}/summary`" icon="i-lucide-clipboard-list">View summary</AppButton>
+    </AppCard>
+
     <!-- Where members send my payout -->
     <PayoutAccountCard v-if="['awaiting_members', 'active'].includes(group.status)" :group-id="group.id" />
 

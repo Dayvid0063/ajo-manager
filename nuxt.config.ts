@@ -117,6 +117,23 @@ export default defineNuxtConfig({
     devOptions: { enabled: false }
   },
 
+  // Security headers on every response (brief §16)
+  routeRules: {
+    '/**': {
+      headers: {
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+        // Conservative CSP that doesn't fight Nuxt's inline hydration scripts
+        'Content-Security-Policy': 'frame-ancestors \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'self\''
+      }
+    },
+    // API responses carry personal/financial data — never cache them
+    '/api/**': { headers: { 'Cache-Control': 'no-store' } }
+  },
+
   hooks: {
     // /design is an internal style guide — never ship it to production
     'pages:extend'(pages) {

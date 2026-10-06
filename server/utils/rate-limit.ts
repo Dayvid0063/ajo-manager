@@ -68,5 +68,6 @@ export const authLimiters = {
   loginByEmail: new RateLimiter(8, 15 * MINUTE),
   registerByIp: new RateLimiter(10, 60 * MINUTE),
   // Stops guessing invite codes
-  inviteLookupByIp: new RateLimiter(60, 15 * MINUTE)
+  inviteLookupByIp: new RateLimiter(60, 15 * MINUTE),
+  disputesByUser: new RateLimiter(10, 60 * MINUTE)
 }

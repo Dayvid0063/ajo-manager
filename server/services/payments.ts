@@ -16,6 +16,8 @@ import { withTransaction } from '../utils/db'
 import { badRequest, conflict, forbidden, notFound } from '../utils/errors'
 import { recordAudit } from './audit'
 import { getAccountForMember } from './bank-accounts'
+import { maybeCompleteCycle } from './cycle'
+import { openDisputeCountForObligation } from './disputes'
 import { loadGroupForMember } from './groups'
 import { managerUserIds } from './membership'
 import { notify } from './notifications'
@@ -131,7 +133,9 @@ export async function getObligationDetail(obligationId: string, userId: string) 
         })
       })
     ),
-    canSubmit: isMine && group.status === 'active' && ['pending', 'rejected'].includes(obligation.status ?? '')
+    canSubmit: isMine && group.status === 'active' && ['pending', 'rejected'].includes(obligation.status ?? ''),
+    // Derived: shown as "In dispute" while a dispute about this payment is open
+    openDisputes: await openDisputeCountForObligation(String(obligation._id))
   }
 }
 
@@ -328,7 +332,10 @@ export async function reviewRecord(
       )
     }
 
-    return { record: toRecordDto(reviewed as RecordWithId, { canReview: false }), roundCompleted }
+    // Last payment of the last round → the whole cycle is complete
+    const cycleCompleted = roundCompleted ? await maybeCompleteCycle(group._id, session, correlationId) : false
+
+    return { record: toRecordDto(reviewed as RecordWithId, { canReview: false }), roundCompleted, cycleCompleted }
   })
 }
 

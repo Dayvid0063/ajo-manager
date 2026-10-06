@@ -45,6 +45,9 @@ without rebuilding. See `.env.example` for the full list. The essentials:
 | `npm run db:up` / `npm run db:down` | Start / stop local MongoDB |
 | `npm run seed` | **Dev only.** Creates test users (refuses to run in production or against Atlas) |
 | `npm run admin:promote -- <email>` | Make an existing user a platform admin (`--revoke` to undo) |
+| `npm run admin:promote:remote -- <email>` | Same, on a database you paste the connection string for (e.g. Atlas) |
+| `npm run db:check` | Check a MongoDB connection string works (e.g. Atlas) before deploying |
+| `npm run secret` | Generate a random value for `NUXT_SESSION_PASSWORD` |
 
 The first `npm test` may take a minute while `mongodb-memory-server` downloads its MongoDB binary.
 
@@ -126,6 +129,51 @@ bucket needs a CORS rule (R2 → bucket → Settings → CORS policy):
 Files are viewed through 60-second signed links, issued only to the payer, the recipient and group admins
 (fee screenshots: the group's owner/admins and platform admins). If R2 isn't configured, uploads show as
 unavailable and members can still report payments with a bank reference.
+
+## Disputes & end of cycle
+
+- Any member can **raise a dispute** (Group → Disputes, or "Report a problem" on a payment). It is visible only to
+  them, the group's owner/admins and platform admins. Owner/admins (never the person who raised it) or Ajo Manager
+  support record the outcome. The app keeps the record only; it does not recover money or enforce payment.
+- The cycle **completes automatically** when the last payment of the last round is confirmed. After the final due
+  date, the owner can also **close the cycle** with a reason; unconfirmed payments stay on record unchanged.
+- **Group → Summary** shows each member's confirmed contributions, payout received and anything outstanding.
+
+## Platform admin
+
+`/admin` (users with `isPlatformAdmin`): overview, **fee verification**, **users** (temporary passwords),
+**groups** (read-only detail), **disputes** (reply and decide as "Ajo Manager support"), and the **audit log**
+(read-only). There is deliberately no admin route that edits contributions, positions or schedules.
+
+## Testing
+
+```bash
+npm test          # unit + database tests (in-memory MongoDB replica set)
+npm run lint
+npm run typecheck
+```
+
+The tests cover schedule generation, payout math (collector included/excluded), duplicate-position
+prevention, activation readiness, starting short, unauthorized access, payment submit/confirm permissions,
+fee verification permissions and no-double-activation, concurrency races, audit entries, reminders,
+disputes and cycle completion.
+
+## Deployment (Railway + Atlas + R2)
+
+1. **MongoDB Atlas:** create a cluster (M0 is fine to start) and a database user, and allow Railway's egress (or
+   `0.0.0.0/0` with a strong password). Copy the `mongodb+srv://…` URI.
+2. **Railway:** create a service from this repo.
+   - Build command: `npm run build` · Start command: `node .output/server/index.mjs`
+   - Health check path: `/api/health`
+   - Variables: `NUXT_MONGODB_URI`, `NUXT_SESSION_PASSWORD` (new value from `npm run secret`), `NUXT_PUBLIC_APP_URL`
+     (`https://your-domain`), `NUXT_MANAGEMENT_FEE_KOBO`, `NUXT_PLATFORM_BANK_*`, `NUXT_R2_*`.
+   - Run **one instance**. Rate limits and reminder de-duplication are per instance (see Known limitations).
+3. **R2:** private bucket; add the production domain to the CORS rule above.
+4. **First platform admin:** register on the live site, then run `npm run admin:promote:remote -- you@example.com`
+   on your computer and paste the Atlas connection string when asked.
+5. Never run `npm run seed` against production; it refuses Atlas URIs and `NODE_ENV=production`.
+
+Reminders run hourly inside the app server (Nitro scheduled task). No separate cron service is needed.
 
 ## Known limitations
 

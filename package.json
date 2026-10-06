@@ -16,7 +16,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "node --env-file-if-exists=.env scripts/seed.ts",
-    "admin:promote": "node --env-file-if-exists=.env scripts/promote-admin.ts"
+    "admin:promote": "node --env-file-if-exists=.env scripts/promote-admin.ts",
+    "db:check": "node scripts/check-db.mjs",
+    "admin:promote:remote": "node scripts/promote-admin.ts --ask-uri",
+    "secret": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.140",
@@ -45,5 +48,8 @@
     "typescript": "^6.0.3",
     "vitest": "^5.0.3",
     "vue-tsc": "^3.3.12"
+  },
+  "engines": {
+    "node": ">=22.12"
   }
 }

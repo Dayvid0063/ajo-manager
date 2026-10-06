@@ -97,6 +97,11 @@
         <AppButton type="submit" icon="i-lucide-send" :loading="pending" :disabled="uploading" block>Mark as paid</AppButton>
       </AppCard>
 
+      <AppAlert v-if="data.openDisputes" tone="warning">
+        <span class="font-bold">In dispute.</span> There's an open dispute about this payment.
+        <NuxtLink :to="`/groups/${o.groupId}/disputes`" class="font-semibold underline">See disputes</NuxtLink>
+      </AppAlert>
+
       <!-- History -->
       <AppCard v-if="data.records.length" class="flex flex-col gap-3">
         <h2 class="font-bold">History</h2>
@@ -108,6 +113,15 @@
           @reviewed="refresh"
         />
       </AppCard>
+
+      <AppButton
+        :to="{ path: `/groups/${o.groupId}/disputes`, query: { obligation: o.id } }"
+        variant="ghost"
+        icon="i-lucide-flag"
+        class="self-start"
+      >
+        Report a problem with this payment
+      </AppButton>
     </template>
   </div>
 </template>

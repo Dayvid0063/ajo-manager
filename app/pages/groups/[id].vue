@@ -62,6 +62,8 @@ const tabs = computed(() => {
     { to: base, label: 'Overview', icon: 'i-lucide-layout-grid' },
     ...(started ? [{ to: `${base}/contributions`, label: 'Payments', icon: 'i-lucide-hand-coins' }] : []),
     ...(started ? [{ to: `${base}/schedule`, label: 'Schedule', icon: 'i-lucide-calendar-days' }] : []),
+    ...(started ? [{ to: `${base}/summary`, label: 'Summary', icon: 'i-lucide-clipboard-list' }] : []),
+    ...(g.status !== 'draft' ? [{ to: `${base}/disputes`, label: 'Disputes', icon: 'i-lucide-flag' }] : []),
     ...(g.status !== 'draft' ? [{ to: `${base}/members`, label: 'Members', icon: 'i-lucide-users-round' }] : []),
     ...(g.canManage && g.status === 'awaiting_members' ? [{ to: `${base}/invite`, label: 'Invite', icon: 'i-lucide-user-plus' }] : []),
     { to: `${base}/rules`, label: 'Rules', icon: 'i-lucide-scroll-text' },

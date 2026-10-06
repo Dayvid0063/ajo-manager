@@ -43,6 +43,22 @@ export const FEE_STATUS_CHIPS = {
   rejected: { status: 'rejected', label: 'Fee not confirmed' }
 }
 
+export const DISPUTE_CATEGORY_OPTIONS = [
+  { value: 'payment_not_confirmed', title: 'I paid but it hasn\'t been confirmed' },
+  { value: 'wrong_amount', title: 'Wrong amount' },
+  { value: 'wrong_recipient_details', title: 'Wrong recipient or bank details' },
+  { value: 'duplicate_record', title: 'A payment was recorded twice' },
+  { value: 'member_misconduct', title: 'A member\'s behaviour' },
+  { value: 'other', title: 'Something else' }
+]
+
+export const DISPUTE_STATUS_CHIPS = {
+  open: { status: 'disputed', label: 'Open' },
+  under_review: { status: 'submitted', label: 'Under review' },
+  resolved: { status: 'confirmed', label: 'Resolved' },
+  rejected: { status: 'upcoming', label: 'Closed' }
+}
+
 export const METHOD_LABELS = {
   bank_transfer: 'Bank transfer',
   cash: 'Cash',

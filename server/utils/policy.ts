@@ -9,7 +9,7 @@ export interface ActorLike {
 }
 
 export interface MembershipLike {
-  user: string
+  user?: unknown
   role: string
   status: string
 }

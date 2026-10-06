@@ -69,7 +69,22 @@ The first `npm test` may take a minute while `mongodb-memory-server` downloads i
 | `admin@ajo.test` | Platform admin |
 | `ada@ajo.test`, `bola@ajo.test`, `chidi@ajo.test`, `musa@ajo.test` | Members |
 
+## Groups & the platform fee
+
+1. A user creates a group (wizard: details → contributions → payout order → rules → review). It starts as a **draft**.
+2. The owner sees the platform's bank details, the fee and a payment reference (`AJO-<code>`), pays **by bank
+   transfer outside the app**, and reports the payment.
+3. A platform admin opens **Platform admin → Fee verification**, checks the bank, and confirms or rejects with a reason.
+4. Confirming moves the group to **awaiting members** and enables invites. This happens once, in one transaction;
+   confirming again changes nothing. The owner gets an in-app alert.
+
+The fee amount and bank details come from `NUXT_MANAGEMENT_FEE_KOBO` and `NUXT_PLATFORM_BANK_*`. If the bank
+details are empty, the fee page tells owners to contact support instead of showing payment details.
+
 ## Known limitations
+
+- Fee evidence uploads (screenshots) arrive with Cloudflare R2 in Phase 5. Until then, owners report the sender
+  name, date and bank reference.
 
 - Login/register rate limits are kept in memory: they apply per server instance and reset on restart.
   That's fine for a single Railway instance; move them to a shared store before running several instances.

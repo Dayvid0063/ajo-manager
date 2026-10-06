@@ -20,7 +20,10 @@
           active-class="!bg-primary-soft !text-primary"
         >
           <Icon :name="item.icon" class="size-5" aria-hidden="true" />
-          {{ item.label }}
+          <span class="flex-1">{{ item.label }}</span>
+          <span v-if="badgeFor(item)" class="tabular rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-on-accent">
+            {{ badgeFor(item) }}<span class="sr-only"> unread</span>
+          </span>
         </NuxtLink>
       </nav>
       <NuxtLink
@@ -62,7 +65,15 @@
         class="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-text-muted"
         active-class="!text-primary"
       >
-        <Icon :name="item.icon" class="size-6" aria-hidden="true" />
+        <span class="relative">
+          <Icon :name="item.icon" class="size-6" aria-hidden="true" />
+          <span
+            v-if="badgeFor(item)"
+            class="tabular absolute -right-2.5 -top-1.5 min-w-5 rounded-full bg-accent px-1 text-center text-[11px] font-bold leading-5 text-on-accent"
+          >
+            {{ badgeFor(item) }}<span class="sr-only"> unread</span>
+          </span>
+        </span>
         {{ item.label }}
       </NuxtLink>
     </nav>
@@ -73,4 +84,15 @@
 import { MEMBER_NAV } from '~/utils/navigation'
 
 const { user } = useUserSession()
+const route = useRoute()
+const { count: unread, refresh: refreshUnread } = useUnreadCount()
+
+function badgeFor(item) {
+  if (item.to !== '/notifications' || !unread.value) return ''
+  return unread.value > 99 ? '99+' : String(unread.value)
+}
+
+// Refresh the badge on load and whenever the page changes
+onMounted(refreshUnread)
+watch(() => route.fullPath, refreshUnread)
 </script>

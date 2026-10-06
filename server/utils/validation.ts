@@ -3,21 +3,9 @@
 // field-level messages the UI can show next to each input.
 import { getQuery, getRouterParams, readBody } from 'h3'
 import type { H3Event } from 'h3'
-import { badRequest } from './errors'
 import type { z } from 'zod'
-
-export interface FieldErrors {
-  [field: string]: string[]
-}
-
-export function toFieldErrors(error: z.ZodError): FieldErrors {
-  const fields: FieldErrors = {}
-  for (const issue of error.issues) {
-    const key = issue.path.length ? issue.path.join('.') : '_'
-    ;(fields[key] ??= []).push(issue.message)
-  }
-  return fields
-}
+import { toFieldErrors } from '#shared/utils/zod'
+import { badRequest } from './errors'
 
 export function parseOrThrow<S extends z.ZodType>(schema: S, input: unknown): z.output<S> {
   const result = schema.safeParse(input)

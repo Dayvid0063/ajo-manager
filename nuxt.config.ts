@@ -43,6 +43,13 @@ export default defineNuxtConfig({
 
   // Server-only values are read from NUXT_* env vars at runtime (see .env.example).
   runtimeConfig: {
+    // nuxt-auth-utils: sealed, httpOnly cookie. Password comes from NUXT_SESSION_PASSWORD.
+    session: {
+      password: '',
+      name: 'ajo-session',
+      maxAge: 60 * 60 * 24 * 7,
+      cookie: { sameSite: 'lax' }
+    },
     mongodbUri: '',
     managementFeeKobo: 370000,
     platformBank: {

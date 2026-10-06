@@ -1,27 +1,34 @@
 // server/utils/authz.ts
 // Event-based guards used at the top of every protected route. The server is the
 // only trust boundary: never rely on the UI hiding a button.
-//
-// SKELETON (Phase 1): session guards are complete; group membership loading is
-// added in Phase 3/4 once the group_members model exists.
 import type { H3Event } from 'h3'
 import type { MemberRole } from '#shared/constants'
-import { forbidden, notFound, unauthorized } from './errors'
-import { hasGroupRole, isPlatformAdmin, type MembershipLike } from './policy'
+import { resolveSessionUser, toSessionUser } from '../services/auth'
+import { forbidden, notFound } from './errors'
+import { hasGroupRole, type MembershipLike } from './policy'
 
-/** Require a logged-in user; returns the session user. */
-export async function requireUser(event: H3Event) {
+/**
+ * Require a logged-in user, re-checked against the database (exists, active,
+ * session not revoked, no pending forced password change).
+ * Returns the fresh session-shaped user.
+ */
+export async function requireUser(event: H3Event, options: { allowPasswordChange?: boolean } = {}) {
   const session = await getUserSession(event)
-  if (!session.user) {
-    throw unauthorized()
+  try {
+    const user = await resolveSessionUser(session.user?.id, session.secure?.sessionVersion, options)
+    return toSessionUser(user)
+  } catch (error) {
+    if ((error as { statusCode?: number }).statusCode === 401 && session.user) {
+      await clearUserSession(event)
+    }
+    throw error
   }
-  return session.user
 }
 
-/** Require a platform admin (e.g. management-fee verification). */
+/** Require a platform admin — checked against the database, not the cookie. */
 export async function requirePlatformAdmin(event: H3Event) {
   const user = await requireUser(event)
-  if (!isPlatformAdmin(user)) {
+  if (!user.isPlatformAdmin) {
     throw forbidden()
   }
   return user

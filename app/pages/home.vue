@@ -4,8 +4,8 @@
 <template>
   <div class="flex flex-col gap-6">
     <div>
-      <p class="text-text-muted">Good morning</p>
-      <h1 class="text-2xl font-extrabold tracking-tight">Your dashboard</h1>
+      <p class="text-text-muted">Welcome back</p>
+      <h1 class="text-2xl font-extrabold tracking-tight">{{ firstName }}</h1>
     </div>
 
     <p class="flex items-center gap-2 rounded-xl border border-dashed border-border px-3 py-2 text-sm text-text-muted">
@@ -53,6 +53,9 @@
 </template>
 
 <script setup>
+const { user } = useUserSession()
+const firstName = computed(() => user.value?.name?.split(/\s+/)[0] || 'Your dashboard')
+
 // SAMPLE DATA — for the design preview only.
 const sample = {
   groupName: 'Sample Ajo Group',

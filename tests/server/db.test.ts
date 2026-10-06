@@ -1,24 +1,14 @@
 // tests/server/db.test.ts
 // Proves the transaction helper really commits/rolls back on a replica set —
 // the same setup as local Docker (rs0) and Atlas.
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { MongoMemoryReplSet } from 'mongodb-memory-server'
+import { describe, expect, it } from 'vitest'
 import mongoose from 'mongoose'
-import { connectDb, isDbConnected, withTransaction } from '../../server/utils/db'
+import { isDbConnected, withTransaction } from '../../server/utils/db'
+import { useTestDatabase } from '../helpers/mongo'
 
-let replSet: MongoMemoryReplSet
 const Thing = mongoose.model('TestThing', new mongoose.Schema({ name: String }, { timestamps: true }))
 
-beforeAll(async () => {
-  replSet = await MongoMemoryReplSet.create({ replSet: { count: 1, storageEngine: 'wiredTiger' } })
-  await connectDb(replSet.getUri())
-  await Thing.createCollection()
-})
-
-afterAll(async () => {
-  await mongoose.disconnect()
-  await replSet?.stop()
-})
+useTestDatabase()
 
 describe('database', () => {
   it('connects', () => {

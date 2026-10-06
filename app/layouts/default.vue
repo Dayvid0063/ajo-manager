@@ -23,6 +23,14 @@
           {{ item.label }}
         </NuxtLink>
       </nav>
+      <NuxtLink
+        v-if="user?.isPlatformAdmin"
+        to="/admin"
+        class="mb-3 flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-status-fee hover:bg-status-fee-soft"
+      >
+        <Icon name="i-lucide-shield-check" class="size-5" aria-hidden="true" />
+        Platform admin
+      </NuxtLink>
       <ThemeToggle compact />
     </aside>
 
@@ -63,4 +71,6 @@
 
 <script setup>
 import { MEMBER_NAV } from '~/utils/navigation'
+
+const { user } = useUserSession()
 </script>

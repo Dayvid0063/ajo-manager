@@ -14,10 +14,13 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed": "node --env-file-if-exists=.env scripts/seed.ts",
+    "admin:promote": "node --env-file-if-exists=.env scripts/promote-admin.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.140",
+    "@node-rs/argon2": "^2.2.2",
     "@nuxt/fonts": "^0.14.0",
     "@nuxt/icon": "^2.5.1",
     "@nuxtjs/color-mode": "^4.0.1",

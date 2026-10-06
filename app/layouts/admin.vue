@@ -22,6 +22,13 @@
           <Icon :name="item.icon" class="size-5" aria-hidden="true" />
           {{ item.label }}
         </NuxtLink>
+        <NuxtLink
+          to="/home"
+          class="flex min-h-11 shrink-0 items-center gap-3 rounded-xl px-3 font-semibold text-text-muted transition-colors hover:bg-surface-muted hover:text-text lg:mt-6"
+        >
+          <Icon name="i-lucide-arrow-left" class="size-5" aria-hidden="true" />
+          Back to app
+        </NuxtLink>
       </nav>
     </aside>
     <main id="main" class="mx-auto w-full max-w-5xl flex-1 px-4 py-6 lg:px-8 lg:py-8">

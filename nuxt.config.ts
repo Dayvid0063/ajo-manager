@@ -35,7 +35,9 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#121412', media: '(prefers-color-scheme: dark)' }
       ],
       link: [
-        { rel: 'icon', href: '/favicon.ico' },
+        // SVG for modern browsers (crisp at any size), .ico (16/32/48) as the fallback
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
         { rel: 'apple-touch-icon', href: '/icons/apple-touch-icon.png' }
       ]
     }
